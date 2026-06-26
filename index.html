@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Favourite Songs</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo+Black&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <div class="scene">
+    <!-- Home navigation -->
+    <a class="home-link" href="https://google.com" aria-label="Home">
+      <svg class="home-icon" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <path d="M3 9.5L10 3l7 6.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M5 8.5V16a.5.5 0 0 0 .5.5H8.5V13h3v3.5h3a.5.5 0 0 0 .5-.5V8.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </a>
+
+    <!-- Background artwork -->
+    <div class="bg-art" aria-hidden="true"></div>
+
+    <!-- Main content card -->
+    <main class="card">
+
+      <!-- ── Left panel ── -->
+      <section class="panel panel--left">
+
+        <header class="game-header">
+          <h1 class="game-title">My Favourite Songs</h1>
+          <div class="game-intro">
+            <p>Maybe, you and I have similar music taste?</p>
+            <p>Click a song button and see if you can guess it from the animation and artwork alone. See those hints? — <strong><em>cough cough</em></strong> — I covered the songs myself to help you along. Rotate the artwork with the slider. No need to strain your neck. I see you.</p>
+          </div>
+        </header>
+
+        <!-- 3×3 Song button grid -->
+        <div class="song-grid" id="songGrid" role="list" aria-label="Song selection">
+          <!-- Buttons are injected by script.js -->
+        </div>
+
+      </section>
+
+      <!-- ── Right panel ── -->
+      <section class="panel panel--right" aria-label="Game area">
+
+        <!-- Reset -->
+        <button class="reset-btn" id="resetBtn" disabled aria-label="Reset game">reset</button>
+        <div class="score-display" id="scoreDisplay" aria-live="polite" aria-label="Session score">
+          <span class="score-label">score</span>
+          <span class="score-value" id="scoreValue">0 / 9</span>
+        </div>
+
+        <!-- Vinyl display -->
+        <div class="vinyl-zone" aria-label="Vinyl display">
+          <div class="vinyl-disc" id="vinylDisc">
+            <!-- Rotation wrapper: handles transform rotate(), img handles scale/opacity -->
+            <div class="vinyl-artwork-wrap" id="vinylArtworkWrap" aria-hidden="true">
+              <img
+                class="vinyl-artwork"
+                id="vinylArtwork"
+                src=""
+                alt=""
+                aria-hidden="true"
+                draggable="false"
+              />
+            </div>
+            <div class="vinyl-hole"></div>
+          </div>
+        </div>
+
+        <!-- Rotation slider -->
+        <div class="slider-row">
+          <div class="slider-dot"></div>
+          <div class="slider-track">
+            <input
+              type="range"
+              id="rotationSlider"
+              class="rotation-slider"
+              min="0" max="360" value="0"
+              disabled
+              aria-label="Rotate vinyl artwork"
+            />
+          </div>
+        </div>
+
+        <!-- Hint buttons / Result message (shared zone) -->
+        <div class="hint-result-zone">
+          <div class="hint-row">
+            <button class="hint-btn" disabled>hint</button>
+            <button class="hint-btn" disabled>hint</button>
+            <button class="hint-btn" disabled>hint</button>
+          </div>
+          <div class="result-msg" id="resultMsg" aria-live="assertive"></div>
+        </div>
+
+        <!-- Guess row -->
+        <div class="guess-row">
+          <input
+            type="text"
+            id="guessInput"
+            class="guess-input"
+            placeholder="guess"
+            disabled
+            aria-label="Type your song guess"
+            autocomplete="off"
+            spellcheck="false"
+          />
+          <button class="submit-btn" id="submitBtn" disabled aria-label="Submit guess">
+            <span class="submit-arrow">↗</span>
+          </button>
+        </div>
+
+        <!-- Attempts counter -->
+        <p class="attempts-display" id="attemptsDisplay" aria-live="polite"></p>
+
+      </section>
+
+    </main>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

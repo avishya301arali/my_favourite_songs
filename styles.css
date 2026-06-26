@@ -1,0 +1,909 @@
+/* ─────────────────────────────────────────────
+   MY FAVOURITE SONGS — Stage 1 Styles
+   Aesthetic: scrapbook · journal · tactile
+───────────────────────────────────────────── */
+
+/* ── Tokens ── */
+:root {
+  --cream:        #edeade;
+  --cream-dark:   #d9d4c4;
+  --tan:          #c8bc9e;
+  --tan-light:    #ddd5b8;
+  --tan-deep:     #a89878;
+  --ink:          #2c2c24;
+  --ink-mid:      #5a5a4a;
+  --ink-faint:    #8a8a72;
+  --gold:         #c89848;
+  --gold-light:   #e0b85a;
+  --vinyl-body:   #c4b89c;
+  --vinyl-shadow: #a8a082;
+
+  --font-display: 'Anton', 'Archivo Black', sans-serif;
+  --font-body:    'DM Sans', sans-serif;
+
+  --radius-btn:   14px;
+  --shadow-lift:  0 4px 16px rgba(60, 55, 40, 0.18);
+  --shadow-press: 0 2px 6px  rgba(60, 55, 40, 0.22);
+  --transition:   200ms cubic-bezier(0.34, 1.2, 0.64, 1);
+}
+
+/* ── Reset ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
+
+body {
+  font-family: var(--font-body);
+  background: var(--cream);
+  color: var(--ink);
+  overflow: hidden;
+  cursor: url('assets/cursor.png') 16 16, auto;
+}
+
+/* ── Scene: full viewport ── */
+.scene {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 40px;
+}
+
+/* ── Background artwork ── */
+.bg-art {
+  position: absolute;
+  inset: 0;
+  background-image: url('assets/background.png');
+  background-size: cover;
+  background-position: center;
+  z-index: 0;
+}
+
+/* ── Home navigation link ── */
+.home-link {
+  position: fixed;
+  top: 20px;
+  left: 28px;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  color: var(--ink-mid);
+  text-decoration: none;
+  opacity: 0.6;
+  cursor: url('assets/cursor.png') 16 16, pointer;
+  transition: opacity 160ms ease;
+}
+
+.home-icon {
+  width: 30px;
+  height: 30px;
+  display: block;
+}
+
+.home-link:hover {
+  opacity: 1;
+}
+
+.home-link:focus-visible {
+  outline: 1.5px solid var(--gold);
+  outline-offset: 4px;
+  border-radius: 2px;
+  opacity: 1;
+}
+
+/* ── Card: main layout container ── */
+.card {
+  position: relative;
+  z-index: 1;
+  display: flex;
+
+  width: 92vw;
+  height: 88vh;
+
+  max-width: 1600px;
+  max-height: 1000px;
+
+  gap: 0;
+}
+
+/* ── Panels ── */
+.panel {
+  display: flex;
+  flex-direction: column;
+  padding: 10px 32px 24px;
+}
+
+.panel--left {
+  flex: 0 0 42%;
+  gap: 12px;
+}
+
+.panel--right {
+  flex: 0 0 58%;
+  gap: 18px;
+  align-items: flex-start;
+  position: relative;
+}
+
+/* ─────────────────────────────────────────────
+   LEFT PANEL — Header
+───────────────────────────────────────────── */
+
+.game-header {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.game-title {
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 4.5vw, 3.2rem);
+  line-height: 1;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+  color: var(--ink);
+  /* Slight hand-stamped feel */
+  text-shadow:
+    2px 2px 0 rgba(44,44,36,0.08),
+    -1px -1px 0 rgba(44,44,36,0.04);
+}
+
+.game-intro {
+  padding-left: 2px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-width: 100%;
+
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-style: italic;
+  font-weight: 300;
+  line-height: 1.55;
+  color: var(--ink-mid);
+}
+
+.game-intro strong em,
+.game-intro em strong {
+  font-style: italic;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+/* ─────────────────────────────────────────────
+   LEFT PANEL — Song Grid
+───────────────────────────────────────────── */
+
+.song-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  flex: 1;
+  align-content: start;
+}
+
+/* ── Song Button ── */
+.song-btn {
+  position: relative;
+  aspect-ratio: 1;
+  border: none;
+  border-radius: var(--radius-btn);
+  cursor: url('assets/cursor.png') 16 16, pointer;
+  overflow: hidden;
+  background: var(--tan-light);
+  box-shadow:
+    0 6px 0 var(--tan-deep),
+    var(--shadow-lift);
+  transition:
+    transform var(--transition),
+    box-shadow var(--transition);
+  outline: none;
+}
+
+.song-btn:focus-visible {
+  outline: 3px solid var(--gold);
+  outline-offset: 3px;
+}
+
+/* Idle image */
+.song-btn__img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: var(--radius-btn);
+  display: block;
+  /* Subtle paper texture overlay via pseudo-element */
+}
+
+/* Paper grain overlay */
+.song-btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  border-radius: var(--radius-btn);
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.06'/%3E%3C/svg%3E");
+  pointer-events: none;
+  mix-blend-mode: multiply;
+  opacity: 0.4;
+}
+
+/* Hover lift */
+.song-btn:not(:disabled):hover {
+  transform: translateY(-3px);
+  box-shadow:
+    0 9px 0 var(--tan-deep),
+    0 12px 24px rgba(60, 55, 40, 0.22);
+}
+
+/* Press down */
+.song-btn:not(:disabled):active,
+.song-btn--pressing {
+  transform: translateY(4px) !important;
+  box-shadow:
+    0 2px 0 var(--tan-deep),
+    var(--shadow-press) !important;
+}
+
+/* Active state glow */
+.song-btn--active {
+  box-shadow:
+    0 6px 0 var(--tan-deep),
+    0 0 0 3px var(--gold),
+    0 8px 24px rgba(200, 152, 72, 0.30) !important;
+  transform: translateY(0) !important;
+}
+
+.song-btn--active::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius-btn);
+  border: 2.5px solid var(--gold-light);
+  z-index: 3;
+  pointer-events: none;
+  animation: activeGlow 2.4s ease-in-out infinite;
+}
+
+@keyframes activeGlow {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.5; }
+}
+
+/* Song number label */
+.song-btn__label {
+  position: absolute;
+  bottom: 6px;
+  right: 9px;
+  z-index: 4;
+  font-family: var(--font-body);
+  font-size: 0.62rem;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  color: rgba(44, 44, 36, 0.45);
+  pointer-events: none;
+  line-height: 1;
+  /* Only visible when no image loaded */
+  display: none;
+}
+
+/* Show number when image fails */
+.song-btn__img.img-error + .song-btn__label {
+  display: block;
+}
+
+/* Fallback background when image missing */
+.song-btn.img-missing {
+  background: linear-gradient(135deg, var(--tan-light) 0%, var(--tan) 100%);
+}
+.song-btn.img-missing .song-btn__label {
+  display: block;
+  bottom: 50%;
+  right: 50%;
+  transform: translate(50%, 50%);
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--ink-mid);
+  opacity: 0.5;
+}
+
+/* ─────────────────────────────────────────────
+   RIGHT PANEL — Game Area (disabled)
+───────────────────────────────────────────── */
+
+/* Reset button — top right of right panel */
+.reset-btn {
+  position: absolute;
+  top: 32px;
+  right: 32px;
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  font-style: italic;
+  font-weight: 400;
+  color: var(--gold);
+  background: var(--ink);
+  border: none;
+  border-radius: 8px;
+  cursor: url('assets/cursor.png') 16 16, not-allowed;
+  opacity: 0.35;
+  letter-spacing: 0.06em;
+  padding: 5px 12px;
+  transition: opacity 180ms ease;
+}
+
+.reset-btn:not(:disabled) {
+  cursor: url('assets/cursor.png') 16 16, pointer;
+  opacity: 1;
+}
+
+.reset-btn:not(:disabled):hover {
+  opacity: 0.8;
+}
+
+/* ── Session score display ── */
+.score-display {
+  position: absolute;
+  top: 72px;
+  right: 32px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0;
+  pointer-events: none;
+}
+
+.score-label {
+  font-family: var(--font-display);
+  font-size: 0.6rem;
+  font-style: normal;
+  font-weight: 400;
+  letter-spacing: 0.1em;
+  color: var(--ink-faint);
+  text-transform: uppercase;
+  line-height: 1;
+}
+
+.score-value {
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  font-weight: 400;
+  color: var(--ink);
+  letter-spacing: 0.02em;
+  line-height: 1.05;
+}
+
+/* ── Vinyl zone ── */
+.vinyl-zone {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding-top: 0;
+}
+
+.vinyl-disc {
+  position: relative;
+  width: 500px;
+  aspect-ratio: 1;
+  border-radius: 50%;
+
+  background: transparent;
+
+  box-shadow:
+    0 8px 28px rgba(60, 55, 40, 0.18);
+
+  overflow: hidden;
+}
+
+/* Concentric ring lines */
+.vinyl-disc::before {
+  display: none;
+}
+
+
+
+/* ── Slider row ── */
+.slider-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 0 4px;
+
+  margin-top: 12px;
+}
+
+.slider-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--tan-deep);
+  opacity: 0.5;
+  flex-shrink: 0;
+}
+
+.slider-track {
+  flex: 1;
+}
+
+.rotation-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--tan);
+  outline: none;
+  cursor: url('assets/cursor.png') 16 16, not-allowed;
+  opacity: 0.45;
+  transition: opacity 180ms ease;
+}
+
+.rotation-slider:not(:disabled) {
+  cursor: url('assets/cursor.png') 16 16, grab;
+  opacity: 1;
+}
+
+.rotation-slider:not(:disabled):active {
+  cursor: url('assets/cursor.png') 16 16, grabbing;
+}
+
+.rotation-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--tan-deep);
+  cursor: url('assets/cursor.png') 16 16, not-allowed;
+}
+
+/* ── Hint / Result shared zone ── */
+.hint-result-zone {
+  position: relative;
+  width: 100%;
+  /* Natural height comes from .hint-row; result overlays that same space */
+}
+
+.hint-row {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+  opacity: 1;
+  transition: opacity 200ms ease;
+}
+
+/* Fade hint buttons out when solved */
+.hint-result-zone--solved .hint-row {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.hint-btn {
+  font-family: var(--font-body);
+  font-size: 0.78rem;
+  font-style: italic;
+  font-weight: 400;
+  color: var(--gold);
+  background: transparent;
+  border: 1.5px solid var(--gold);
+  border-radius: 8px;
+  padding: 6px 18px;
+  cursor: url('assets/cursor.png') 16 16, not-allowed;
+  opacity: 0.45;
+  letter-spacing: 0.03em;
+  transition: background 160ms ease, color 160ms ease, opacity 160ms ease;
+  border-image: none;
+}
+
+/* Active (currently playing) state — matches reset button palette */
+.hint-btn--active {
+  background: var(--ink);
+  color: var(--gold);
+  border-color: var(--ink);
+  opacity: 1;
+}
+
+/* ── Guess row ── */
+.guess-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+
+.guess-input {
+  flex: 1;
+  font-family: var(--font-body);
+  font-size: 0.88rem;
+  font-style: italic;
+  font-weight: 300;
+  color: var(--cream);
+  background: var(--ink);
+  border: none;
+  border-radius: 10px;
+  padding: 10px 16px;
+  cursor: url('assets/cursor.png') 16 16, not-allowed;
+  opacity: 0.55;
+  outline: none;
+  letter-spacing: 0.04em;
+}
+
+.guess-input::placeholder {
+  color: rgba(237, 234, 222, 0.45);
+}
+
+.submit-btn {
+  width: 38px;
+  height: 38px;
+  flex-shrink: 0;
+  background: var(--tan-light);
+  border: none;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: url('assets/cursor.png') 16 16, not-allowed;
+  opacity: 0.45;
+  box-shadow: 0 3px 0 var(--tan-deep);
+}
+
+.submit-arrow {
+  font-size: 1rem;
+  color: var(--ink-mid);
+  line-height: 1;
+}
+
+/* ─────────────────────────────────────────────
+   Reduced motion
+───────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .song-btn,
+  .song-btn::after {
+    transition: none;
+    animation: none;
+  }
+}
+
+/* ═════════════════════════════════════════════
+   STAGE 2 — Vinyl artwork, guessing, results
+═════════════════════════════════════════════ */
+
+/* ── Vinyl artwork image ── */
+/* ── Vinyl artwork rotation wrapper ──
+   Handles only transform:rotate — no transition, instant response to slider.
+   The img inside handles opacity + scale with its own CSS transition.         */
+.vinyl-artwork-wrap {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  z-index: 1;
+  /* No transition — rotation must be instant */
+  transform: rotate(0deg);
+}
+
+.vinyl-artwork {
+  /* Fill the wrapper (not the disc directly) */
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid rgba(255,255,255,0.9);
+  display: block;
+  /* Start invisible and scaled down — JS adds --visible to animate in */
+  opacity: 0;
+  transform: scale(0.82);
+  transition:
+    opacity  500ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 500ms cubic-bezier(0.22, 1, 0.36, 1);
+  /* Hide broken-image icon */
+  font-size: 0;
+  color: transparent;
+}
+
+.vinyl-artwork--visible {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* Hole must sit above the artwork wrapper */
+.vinyl-hole {
+  z-index: 2;
+}
+
+/* ── Guess input — enabled state ── */
+.guess-input:not(:disabled) {
+  opacity: 1;
+  cursor: url('assets/cursor.png') 16 16, text;
+  transition: box-shadow 180ms ease, border-color 180ms ease;
+}
+
+.guess-input:not(:disabled):focus {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--gold);
+}
+
+/* ── Submit button — enabled state ── */
+.submit-btn:not(:disabled) {
+  opacity: 1;
+  cursor: url('assets/cursor.png') 16 16, pointer;
+  transition: transform var(--transition), box-shadow var(--transition);
+}
+
+.submit-btn:not(:disabled):hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 0 var(--tan-deep);
+}
+
+.submit-btn:not(:disabled):active {
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 var(--tan-deep);
+}
+
+/* ── Attempts display ── */
+.attempts-display {
+  font-family: var(--font-body);
+  font-size: 0.76rem;
+  font-weight: 400;
+  color: var(--ink-faint);
+  letter-spacing: 0.04em;
+  min-height: 1.2em;
+  padding-left: 2px;
+  transition: color 250ms ease;
+}
+
+.attempts-display--warning {
+  color: #b06030;
+}
+
+.attempts-display--danger {
+  color: #9a3020;
+  font-weight: 500;
+}
+
+/* ── Result message ── */
+
+/* Overlays the .hint-row within .hint-result-zone */
+.result-msg {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0;
+  padding: 0 2px;
+  pointer-events: none;
+  opacity: 0;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+/* Correct result — fades in after hint row fades out */
+.result-msg--correct {
+  pointer-events: auto;
+  opacity: 1;
+}
+
+.result-msg--correct .result-inline {
+
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-style: normal;
+  font-weight: 400;
+  letter-spacing: 0.1em;
+  color: var(--ink-faint);
+  text-transform: uppercase;
+  line-height: 1;
+  animation: resultPop 320ms 180ms cubic-bezier(0.34, 1.5, 0.64, 1) both;
+}
+
+.result-msg--correct .result-inline .result-label {
+  font-family: var(--font-display);
+  font-size: 0.9rem;
+  letter-spacing: 0.05em;
+  color: #4a7a3a;
+  text-transform: uppercase;
+}
+
+.result-msg--correct .result-inline .result-sep {
+  color: var(--ink-faint);
+  margin: 0 0.45em;
+  font-weight: 300;
+}
+
+.result-msg--correct .result-inline .result-song {
+  font-style: italic;
+  font-weight: 300;
+  color: var(--ink-mid);
+}
+
+
+/* Reveal result (out of attempts) — matches correct state hierarchy */
+.result-msg--reveal {
+  pointer-events: auto;
+  opacity: 1;
+}
+
+.result-msg--reveal .result-label {
+  font-family: var(--font-display);
+  font-size: 0.9rem;
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  line-height: 1;
+  animation: resultFadeUp 280ms ease both;
+}
+
+.result-msg--reveal .result-band {
+  font-family: var(--font-display);
+  font-size: 0.99rem;
+  font-weight: 400;
+  color: var(--ink);
+  margin-left: 0.6em;
+  animation: resultFadeUp 280ms 80ms ease both;
+}
+
+.result-msg--reveal .result-sep {
+  color: var(--ink-faint);
+  margin: 0 0.45em;
+  font-weight: 300;
+  animation: resultFadeUp 280ms 120ms ease both;
+}
+
+.result-msg--reveal .result-song {
+  font-family: var(--font-display);
+  font-size: 0.99rem;
+  font-style: italic;
+  font-weight: 400;
+  color: var(--ink-mid);
+  animation: resultFadeUp 280ms 160ms ease both;
+}
+
+
+/* ── Result animations ── */
+@keyframes resultPop {
+  from { opacity: 0; transform: scale(0.88) translateY(4px); }
+  to   { opacity: 1; transform: scale(1)    translateY(0); }
+}
+
+@keyframes resultFadeUp {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Reduced motion overrides for Stage 2 ── */
+@media (prefers-reduced-motion: reduce) {
+  .vinyl-artwork {
+    transition: opacity 200ms ease;
+  }
+  /* Wrapper has no transition, so nothing to override there */
+  .result-msg--correct .result-inline,
+  .result-msg--reveal .result-label,
+  .result-msg--reveal .result-band,
+  .result-msg--reveal .result-sep,
+  .result-msg--reveal .result-song {
+    animation: none;
+    opacity: 1;
+  }
+}
+
+/* ── Wrong guess shake ── */
+@keyframes inputShake {
+  0%, 100% { transform: translateX(0); }
+  18%       { transform: translateX(-6px); }
+  36%       { transform: translateX(6px); }
+  54%       { transform: translateX(-4px); }
+  72%       { transform: translateX(4px); }
+  90%       { transform: translateX(-2px); }
+}
+
+.input--shake {
+  animation: inputShake 380ms cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .input--shake { animation: none; }
+}
+
+/* ═════════════════════════════════════════════
+   MOBILE LAYOUT — ≤ 900px
+   Single-column vertical stack. Desktop layout
+   (above 900px) is completely unchanged.
+════════════════════════════════════════════════ */
+@media (max-width: 900px) {
+
+  /* Allow the page to scroll vertically */
+  body {
+    overflow: auto;
+  }
+
+  /* Scene: let height be determined by content */
+  .scene {
+    height: auto;
+    min-height: 100vh;
+    align-items: flex-start;
+    padding: 0;
+  }
+
+  /* Card: switch from side-by-side to vertical column */
+  .card {
+    flex-direction: column;
+    width: 100%;
+    height: auto;
+    max-width: 100%;
+    max-height: none;
+    gap: 0;
+  }
+
+  /* Both panels: full width, reduced padding */
+  .panel {
+    padding: 24px 20px 16px;
+    width: 100%;
+  }
+
+  /* Left panel: natural height, tighter gap */
+  .panel--left {
+    flex: none;
+    gap: 16px;
+  }
+
+  /* Right panel: natural height, centred children */
+  .panel--right {
+    flex: none;
+    gap: 16px;
+    align-items: center;
+    padding-top: 0;
+  }
+
+  /* Vinyl disc: fill viewport width, cap at 340px */
+  .vinyl-disc {
+    width: min(80vw, 340px);
+  }
+
+  /* Reset button: keep absolutely positioned but adjust placement */
+  .reset-btn {
+    top: 12px;
+    right: 16px;
+  }
+
+  .score-display {
+    top: 50px;
+    right: 16px;
+  }
+
+  /* Slider row and hint row: full width */
+  .slider-row,
+  .hint-result-zone,
+  .guess-row {
+    width: 100%;
+    max-width: min(80vw, 340px);
+  }
+
+  /* Attempts display and result: centred */
+  .attempts-display,
+  .result-msg {
+    text-align: center;
+  }
+
+  /* Song grid: keep 3×3, let buttons shrink to fit */
+  .song-grid {
+    width: 100%;
+    gap: 10px;
+  }
+
+  /* Intro text: full width on mobile */
+  .game-intro {
+    max-width: 100%;
+  }
+
+  /* Slider top margin already set via margin-top on .slider-row in desktop;
+     remove it on mobile since gap handles spacing */
+  .slider-row {
+    margin-top: 0;
+  }
+}
