@@ -74,14 +74,16 @@
 
   // Guessing state — scoped to the active song
   const guessState = {
-    attemptsLeft: MAX_ATTEMPTS,
-    resolved:     false,        // true once correct or out of attempts
+    attemptsLeft:    MAX_ATTEMPTS,
+    resolved:        false,   // true once correct or out of attempts
+    artistConfirmed: false,   // true after a correct artist-only guess (+0.5)
   };
 
   // Session score — persists for the lifetime of the page, unaffected by Reset
   const sessionScore = {
-    counted: new Set(),   // song IDs already awarded a point this session
-    total:   0,
+    counted:      new Set(),  // song IDs with a full point
+    halfCounted:  new Set(),  // song IDs with a half point (artist only)
+    total:        0,          // displayed score (in 0.5 increments internally)
   };
 
   // Audio state — single source of truth for what is currently playing
@@ -105,6 +107,7 @@
   const resultMsg       = document.getElementById("resultMsg");
   const hintResultZone  = document.querySelector(".hint-result-zone");
   const scoreValue      = document.getElementById("scoreValue");
+  const idkBtn          = document.getElementById("idkBtn");
 
   /* ═══════════════════════════════════════════
      ASSET PATH HELPERS
@@ -349,25 +352,55 @@
        * Play a hint snippet (n = 2, 3, or 4).
        * Clicking the same hint restarts it; clicking a different hint stops the current one.
        */
-      playHint(songId, n) {
+      playHint(songId, n, btn, originalLabel) {
         if (!audioState.hintAudio) audioState.hintAudio = new Audio();
         const src = audioSrc(songId, n);
         // Always reload — handles both "same hint restart" and "different hint switch"
         _load(audioState.hintAudio, src);
         audioState.hintIndex = n;
 
-        // Mark the active button; clear previous active state first
+        // Clear all hint buttons first
         const hintBtns = document.querySelectorAll(".hint-btn");
-        hintBtns.forEach(b => b.classList.remove("hint-btn--active"));
-        const activeBtn = hintBtns[n - 2]; // n=2→index 0, n=3→1, n=4→2
-        if (activeBtn) activeBtn.classList.add("hint-btn--active");
+        hintBtns.forEach(b => {
+          b.classList.remove("hint-btn--active");
+          // Restore original label on any previously-active button
+          if (b.dataset.origLabel) {
+            b.textContent = b.dataset.origLabel;
+            delete b.dataset.origLabel;
+          }
+        });
 
-        // Remove active state when the clip finishes naturally
+        // Set this button to active / "stop"
+        if (btn) {
+          btn.dataset.origLabel = originalLabel;
+          btn.textContent = "stop";
+          btn.classList.add("hint-btn--active");
+        }
+
+        // Restore label when clip ends naturally
         audioState.hintAudio.addEventListener("ended", () => {
-          if (activeBtn) activeBtn.classList.remove("hint-btn--active");
+          if (btn) {
+            btn.classList.remove("hint-btn--active");
+            btn.textContent = originalLabel;
+            delete btn.dataset.origLabel;
+          }
         }, { once: true });
 
         _play(audioState.hintAudio, `sound_${n} for ${songId}`);
+      },
+
+      /** Stop the currently-playing hint and revert the button label. */
+      stopHint(btn, originalLabel) {
+        if (audioState.hintAudio) {
+          audioState.hintAudio.pause();
+          audioState.hintAudio.currentTime = 0;
+          audioState.hintIndex = null;
+        }
+        if (btn) {
+          btn.classList.remove("hint-btn--active");
+          btn.textContent = originalLabel;
+          delete btn.dataset.origLabel;
+        }
       },
 
       /** Pause all audio immediately (used on song switch and reset). */
@@ -381,8 +414,14 @@
           audioState.hintAudio.currentTime = 0;
           audioState.hintIndex = null;
         }
-        // Clear any active hint button state
-        document.querySelectorAll(".hint-btn--active").forEach(b => b.classList.remove("hint-btn--active"));
+        // Clear active state and restore original labels on all hint buttons
+        document.querySelectorAll(".hint-btn").forEach(b => {
+          b.classList.remove("hint-btn--active");
+          if (b.dataset.origLabel) {
+            b.textContent = b.dataset.origLabel;
+            delete b.dataset.origLabel;
+          }
+        });
       },
 
       /**
@@ -406,8 +445,9 @@
    * Reset everything for a freshly selected song.
    */
   function resetGuessState() {
-    guessState.attemptsLeft = MAX_ATTEMPTS;
-    guessState.resolved     = false;
+    guessState.attemptsLeft    = MAX_ATTEMPTS;
+    guessState.resolved        = false;
+    guessState.artistConfirmed = false;
 
     // Clear fields
     guessInput.value = "";
@@ -429,6 +469,7 @@
       btn.style.cursor = enabled ? "pointer" : "not-allowed";
       btn.style.opacity = enabled ? "1" : "";
     });
+    idkBtn.disabled = !enabled;
   }
 
   /**
@@ -451,11 +492,27 @@
    * Award a point for the given song if it hasn't been counted this session.
    * Called once per correct guess.
    */
-  function updateScore(songId) {
-    if (sessionScore.counted.has(songId)) return; // already awarded
-    sessionScore.counted.add(songId);
-    sessionScore.total += 1;
-    scoreValue.textContent = `${sessionScore.total} / ${SONGS.length}`;
+  function updateScore(songId, half = false) {
+    if (sessionScore.counted.has(songId)) return; // already a full point — don't add more
+    if (half) {
+      if (sessionScore.halfCounted.has(songId)) return; // already have the half point
+      sessionScore.halfCounted.add(songId);
+      sessionScore.total += 0.5;
+    } else {
+      // Full point: if we had a half point, top up by 0.5, else add full 1
+      if (sessionScore.halfCounted.has(songId)) {
+        sessionScore.halfCounted.delete(songId);
+        sessionScore.total += 0.5; // already had +0.5, top up to +1
+      } else {
+        sessionScore.total += 1;
+      }
+      sessionScore.counted.add(songId);
+    }
+    // Display — show as whole numbers when possible, e.g. "1 / 9" not "1.0 / 9"
+    const display = Number.isInteger(sessionScore.total)
+      ? sessionScore.total
+      : sessionScore.total.toFixed(1);
+    scoreValue.textContent = `${display} / ${SONGS.length}`;
   }
 
   function updateAttemptsDisplay() {
@@ -498,15 +555,24 @@
 
     if (!guess) return; // empty input — do nothing
 
-    const song   = SONGS.find((s) => s.id === activeSongId);
-    const target = normalizeAnswer(song.answer);
+    const song       = SONGS.find((s) => s.id === activeSongId);
+    const target     = normalizeAnswer(song.answer);
+    const artistNorm = normalizeAnswer(song.artist);
 
-    if (guess === target) {
-      // ── Correct ──
+    // ── Full correct answer (or song title alone after artist confirmed) ──
+    if (guess === target || (guessState.artistConfirmed && guess === normalizeAnswer(song.answer))) {
       guessState.resolved = true;
       setGuessEnabled(false);
       updateAttemptsDisplay();
       showCorrect(song);
+
+    // ── Artist-only correct (and song not yet confirmed) ──
+    } else if (!guessState.artistConfirmed && guess === artistNorm) {
+      guessState.artistConfirmed = true;
+      updateScore(activeSongId, true); // +0.5
+      guessInput.value = "";
+      showArtistCorrect(song);
+
     } else {
       // ── Wrong ──
       guessState.attemptsLeft -= 1;
@@ -547,6 +613,18 @@
     resultMsg.className   = "result-msg";
     resultMsg.innerHTML   = "";
     attemptsDisplay.textContent = "";
+    attemptsDisplay.innerHTML   = "";
+  }
+
+  function showArtistCorrect(song) {
+    // Brief flash in the attempts area — doesn't use hint-result-zone overlay
+    // so hints stay visible and usable
+    attemptsDisplay.innerHTML = `<span class="artist-correct-msg">artist correct — now guess the song title</span>`;
+    // Restore normal "Attempts remaining" after 2.5 s
+    setTimeout(() => {
+      if (!guessState.resolved) updateAttemptsDisplay();
+    }, 2500);
+    guessInput.focus();
   }
 
   function showCorrect(song) {
@@ -651,9 +729,11 @@
     guessInput.disabled = true;
     submitBtn.disabled  = true;
     setHintsEnabled(false);
+    idkBtn.disabled     = true;
 
-    guessState.attemptsLeft = MAX_ATTEMPTS;
-    guessState.resolved     = false;
+    guessState.attemptsLeft    = MAX_ATTEMPTS;
+    guessState.resolved        = false;
+    guessState.artistConfirmed = false;
 
     attemptsDisplay.textContent = "";
     attemptsDisplay.className   = "attempts-display";
@@ -678,10 +758,33 @@
     const hintBtns = document.querySelectorAll(".hint-btn");
     hintBtns.forEach((btn, i) => {
       const soundIndex = i + 2; // 0→sound_2, 1→sound_3, 2→sound_4
+      const originalLabel = btn.textContent;
+
       btn.addEventListener("click", () => {
-        if (!activeSongId) return; // no song selected — do nothing
-        audioManager.playHint(activeSongId, soundIndex);
+        if (!activeSongId) return;
+
+        // If this button is currently active (playing), stop it
+        if (btn.classList.contains("hint-btn--active")) {
+          audioManager.stopHint(btn, originalLabel);
+          return;
+        }
+
+        // Otherwise start playing — label changes to "stop" via playHint
+        audioManager.playHint(activeSongId, soundIndex, btn, originalLabel);
       });
+    });
+
+    // I Don't Know button
+    idkBtn.addEventListener("click", () => {
+      if (!activeSongId || guessState.resolved) return;
+      const song = SONGS.find((s) => s.id === activeSongId);
+      guessState.resolved = true;
+      audioManager.stopAll();
+      setGuessEnabled(false);
+      setHintsEnabled(false);
+      updateAttemptsDisplay();
+      showReveal(song);
+      // No score awarded
     });
   }
 

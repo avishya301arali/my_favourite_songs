@@ -47,7 +47,7 @@ body {
   display: flex;
   align-items: flex-start;
   justify-content: center;
-  padding-top: 40px;
+  padding-top: 34px;
 }
 
 /* ── Background artwork ── */
@@ -116,13 +116,14 @@ body {
 
 .panel--left {
   flex: 0 0 42%;
-  gap: 12px;
+  gap: 20px;
 }
 
 .panel--right {
   flex: 0 0 58%;
-  gap: 18px;
+  gap: 0;
   align-items: flex-start;
+  justify-content: space-between;
   position: relative;
 }
 
@@ -133,7 +134,7 @@ body {
 .game-header {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 9px;
 }
 
 .game-title {
@@ -153,21 +154,34 @@ body {
   padding-left: 2px;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
   max-width: 100%;
 
   font-family: var(--font-body);
-  font-size: 13px;
+  font-size: 12px;
   font-style: italic;
   font-weight: 300;
-  line-height: 1.55;
+  line-height: 1.4;
   color: var(--ink-mid);
+}
+
+.game-intro__lead {
+  font-size: 12px;
+  font-weight: 500;
+  font-style: italic;
+  color: var(--ink-mid);
+}
+
+.game-intro strong {
+  font-weight: 900;
+  font-style: italic;
+  color: var(--ink);
 }
 
 .game-intro strong em,
 .game-intro em strong {
   font-style: italic;
-  font-weight: 600;
+  font-weight: 900;
   color: var(--ink);
 }
 
@@ -379,15 +393,16 @@ body {
 /* ── Vinyl zone ── */
 .vinyl-zone {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
   width: 100%;
   padding-top: 0;
+  flex: 1;  /* grow to fill space, pushing controls to bottom */
 }
 
 .vinyl-disc {
   position: relative;
-  width: 500px;
+  width: min(90%, 540px);
   aspect-ratio: 1;
   border-radius: 50%;
 
@@ -417,13 +432,16 @@ body {
   margin-top: 12px;
 }
 
-.slider-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--tan-deep);
-  opacity: 0.5;
+.slider-label {
+  font-family: var(--font-display);
+  font-size: 0.6rem;
+  font-weight: 400;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
   flex-shrink: 0;
+  line-height: 1;
+  user-select: none;
 }
 
 .slider-track {
@@ -475,7 +493,10 @@ body {
   width: 100%;
   opacity: 1;
   transition: opacity 200ms ease;
+  align-items: center;
 }
+
+
 
 /* Fade hint buttons out when solved */
 .hint-result-zone--solved .hint-row {
@@ -496,14 +517,43 @@ body {
   cursor: url('assets/cursor.png') 16 16, not-allowed;
   opacity: 0.45;
   letter-spacing: 0.03em;
-  transition: background 160ms ease, color 160ms ease, opacity 160ms ease;
+  transition: background 160ms ease, color 160ms ease, opacity 160ms ease, border-color 160ms ease;
   border-image: none;
 }
 
-/* Active (currently playing) state — matches reset button palette */
+/* Active (currently playing) state — also used for Stop label */
 .hint-btn--active {
   background: var(--ink);
   color: var(--gold);
+  border-color: var(--ink);
+  opacity: 1;
+}
+
+/* I Don't Know button — secondary, subtle */
+.idk-btn {
+  font-family: var(--font-body);
+  font-size: 0.72rem;
+  font-style: italic;
+  font-weight: 300;
+  color: var(--ink-faint);
+  background: transparent;
+  border: 1.5px dashed var(--ink-faint);
+  border-radius: 8px;
+  padding: 6px 14px;
+  cursor: url('assets/cursor.png') 16 16, not-allowed;
+  opacity: 0.45;
+  letter-spacing: 0.02em;
+  transition: opacity 160ms ease, color 160ms ease, border-color 160ms ease;
+  white-space: nowrap;
+}
+
+.idk-btn:not(:disabled) {
+  cursor: url('assets/cursor.png') 16 16, pointer;
+  opacity: 1;
+}
+
+.idk-btn:not(:disabled):hover {
+  color: var(--ink);
   border-color: var(--ink);
   opacity: 1;
 }
@@ -645,6 +695,24 @@ body {
 }
 
 /* ── Attempts display ── */
+.artist-correct-msg {
+  font-family: var(--font-body);
+  font-size: 0.78rem;
+  font-style: italic;
+  font-weight: 400;
+  color: #4a7a3a;
+  letter-spacing: 0.02em;
+  animation: resultFadeUp 220ms ease both;
+}
+
+.right-controls {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding-bottom: 8px;
+}
+
 .attempts-display {
   font-family: var(--font-body);
   font-size: 0.76rem;
@@ -741,7 +809,7 @@ body {
 
 .result-msg--reveal .result-band {
   font-family: var(--font-display);
-  font-size: 0.99rem;
+  font-size: 0.9rem;
   font-weight: 400;
   color: var(--ink);
   margin-left: 0.6em;
@@ -757,7 +825,7 @@ body {
 
 .result-msg--reveal .result-song {
   font-family: var(--font-display);
-  font-size: 0.99rem;
+  font-size: 0.9rem;
   font-style: italic;
   font-weight: 400;
   color: var(--ink-mid);
@@ -852,12 +920,18 @@ body {
     gap: 16px;
   }
 
-  /* Right panel: natural height, centred children */
+  /* Right panel: natural height, centred children; override space-between for mobile */
   .panel--right {
     flex: none;
     gap: 16px;
     align-items: center;
+    justify-content: flex-start;
     padding-top: 0;
+  }
+
+  .right-controls {
+    width: 100%;
+    gap: 14px;
   }
 
   /* Vinyl disc: fill viewport width, cap at 340px */

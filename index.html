@@ -32,8 +32,10 @@
         <header class="game-header">
           <h1 class="game-title">My Favourite Songs</h1>
           <div class="game-intro">
-            <p>Maybe, you and I have similar music taste?</p>
-            <p>Click a song button and see if you can guess it from the animation and artwork alone. See those hints? — <strong><em>cough cough</em></strong> — I covered the songs myself to help you along. Rotate the artwork with the slider. No need to strain your neck. I see you.</p>
+            <p class="game-intro__lead">Think you and I have similar music taste? Let's find out.</p>
+            <p>Pick a song and try to guess it before hearing any audio. <strong>Each song reveals an animation on the button itself and its artwork</strong>—those are your first clues.</p>
+            <p>If you're stuck, use the hints to hear short snippets I've covered myself.</p>
+            <p>And yes, you can rotate the artwork with the slider. No need to strain your neck. I see you.</p>
           </div>
         </header>
 
@@ -72,50 +74,56 @@
           </div>
         </div>
 
-        <!-- Rotation slider -->
-        <div class="slider-row">
-          <div class="slider-dot"></div>
-          <div class="slider-track">
+        <!-- Controls: grouped so space-between pushes them to bottom -->
+        <div class="right-controls">
+
+          <!-- Rotation slider -->
+          <div class="slider-row">
+            <span class="slider-label">rotate</span>
+            <div class="slider-track">
+              <input
+                type="range"
+                id="rotationSlider"
+                class="rotation-slider"
+                min="0" max="360" value="0"
+                disabled
+                aria-label="Rotate vinyl artwork"
+              />
+            </div>
+          </div>
+
+          <!-- Hint buttons / Result message (shared zone) -->
+          <div class="hint-result-zone">
+            <div class="hint-row">
+              <button class="hint-btn" data-hint-index="0" disabled>hint</button>
+              <button class="hint-btn" data-hint-index="1" disabled>hint</button>
+              <button class="hint-btn" data-hint-index="2" disabled>hint</button>
+              <button class="idk-btn" id="idkBtn" disabled>i don't know</button>
+            </div>
+            <div class="result-msg" id="resultMsg" aria-live="assertive"></div>
+          </div>
+
+          <!-- Guess row -->
+          <div class="guess-row">
             <input
-              type="range"
-              id="rotationSlider"
-              class="rotation-slider"
-              min="0" max="360" value="0"
+              type="text"
+              id="guessInput"
+              class="guess-input"
+              placeholder="guess song"
               disabled
-              aria-label="Rotate vinyl artwork"
+              aria-label="Type your song guess"
+              autocomplete="off"
+              spellcheck="false"
             />
+            <button class="submit-btn" id="submitBtn" disabled aria-label="Submit guess">
+              <span class="submit-arrow">↗</span>
+            </button>
           </div>
-        </div>
 
-        <!-- Hint buttons / Result message (shared zone) -->
-        <div class="hint-result-zone">
-          <div class="hint-row">
-            <button class="hint-btn" disabled>hint</button>
-            <button class="hint-btn" disabled>hint</button>
-            <button class="hint-btn" disabled>hint</button>
-          </div>
-          <div class="result-msg" id="resultMsg" aria-live="assertive"></div>
-        </div>
+          <!-- Attempts counter -->
+          <p class="attempts-display" id="attemptsDisplay" aria-live="polite"></p>
 
-        <!-- Guess row -->
-        <div class="guess-row">
-          <input
-            type="text"
-            id="guessInput"
-            class="guess-input"
-            placeholder="guess"
-            disabled
-            aria-label="Type your song guess"
-            autocomplete="off"
-            spellcheck="false"
-          />
-          <button class="submit-btn" id="submitBtn" disabled aria-label="Submit guess">
-            <span class="submit-arrow">↗</span>
-          </button>
         </div>
-
-        <!-- Attempts counter -->
-        <p class="attempts-display" id="attemptsDisplay" aria-live="polite"></p>
 
       </section>
 
