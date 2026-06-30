@@ -798,6 +798,35 @@
     bindRotationSlider();  // Stage 3
     bindResetButton();     // Stage 3
     bindHintButtons();     // Stage 3
+    preloadAllAssets();    // Background preload — does not block initial render
+  }
+
+  /**
+   * Preload every song's images and audio in the background so the first
+   * click on any song button feels identical to subsequent clicks.
+   * Failures are logged but never block gameplay — each asset preloads
+   * independently and the game works fine even if one is missing.
+   */
+  function preloadAllAssets() {
+    SONGS.forEach((song) => {
+      const id = song.id;
+
+      // ── Images: idle, press, active, vinyl artwork ──
+      [idleSrc(id), pressSrc(id), activeSrc(id), vinylSrc(id)].forEach((src) => {
+        const img = new Image();
+        img.onerror = () => console.warn(`[preload] Failed to load image: ${src}`);
+        img.src = src;
+      });
+
+      // ── Audio: sound_1 through sound_4 ──
+      for (let n = 1; n <= 4; n++) {
+        const src = audioSrc(id, n);
+        const audio = new Audio();
+        audio.preload = "auto";
+        audio.onerror = () => console.warn(`[preload] Failed to load audio: ${src}`);
+        audio.src = src;
+      }
+    });
   }
 
   if (document.readyState === "loading") {
