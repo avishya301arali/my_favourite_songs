@@ -16,46 +16,55 @@
       id:     "mj_way_you_make_me_feel",
       artist: "Michael Jackson",
       answer: "The Way You Make Me Feel",
+      yt: { id: "HzZ_urpj4As", start: 136 },
     },
     {
       id:     "abba_dancing_queen",
       artist: "ABBA",
       answer: "Dancing Queen",
+      yt: { id: "xFrGuyw1V8s", start: 86 },
     },
     {
       id:     "pvris_hallucinations",
       artist: "PVRIS",
       answer: "Hallucinations",
+      yt: { id: "NzdUeJnn0gM", start: 50 },
     },
     {
       id:     "guns_n_roses_sweet_child_o_mine",
       artist: "Guns N Roses",
       answer: "Sweet Child O Mine",
+      yt: { id: "1w7OgIMMRc4", start: 60 },
     },
     {
       id:     "iron_maiden_wasted_years",
       artist: "Iron Maiden",
       answer: "Wasted Years",
+      yt: { id: "Ij99dud8-0A", start: 220 },
     },
     {
       id:     "witt_lowry_into_your_arms",
       artist: "Witt Lowry",
       answer: "Into Your Arms",
+      yt: { id: "h3YXec5gJi0", start: 150 },
     },
     {
       id:     "i_prevail_deep_end",
       artist: "I Prevail",
       answer: "Deep End",
+      yt: { id: "QbSX8x6d5fs", start: 196 },
     },
     {
       id:     "unravel_tokyo_ghoul",
       artist: "TK",
       answer: "Unravel",
+      yt: { id: "QKXi08chD2E", start: 158 },
     },
     {
       id:     "bad_omens_just_pretend",
       artist: "Bad Omens",
       answer: "Just Pretend",
+      yt: { id: "GLRFl26Q92s", start: 163 },
     },
   ];
 
@@ -108,6 +117,9 @@
   const hintResultZone  = document.querySelector(".hint-result-zone");
   const scoreValue      = document.getElementById("scoreValue");
   const idkBtn          = document.getElementById("idkBtn");
+  const ytPanel         = document.getElementById("ytPanel");
+  const ytEmbed         = document.getElementById("ytEmbed");
+  const ytClose         = document.getElementById("ytClose");
 
   /* ═══════════════════════════════════════════
      ASSET PATH HELPERS
@@ -126,6 +138,18 @@
     return btn.querySelector(".song-btn__img");
   }
 
+  /**
+   * Restart a GIF from frame 1 by cloning the image node and replacing it.
+   * The old node stays in the DOM until replaceChild completes, so there is
+   * never a blank frame. No URL manipulation, no network request.
+   * Returns the new node — callers must use this reference going forward.
+   */
+  function restartGif(img) {
+    const clone = img.cloneNode(true);
+    img.parentNode.replaceChild(clone, img);
+    return clone;
+  }
+
   function setButtonIdle(btn, img, songId) {
     btn.classList.remove("song-btn--pressing", "song-btn--active");
     btn.setAttribute("aria-pressed", "false");
@@ -138,11 +162,12 @@
     btn.classList.add("song-btn--pressing");
     btn.classList.remove("song-btn--active");
     btn.setAttribute("aria-pressed", "true");
-    img.src = "";
     img.src = pressSrc(songId);
+    const newImg = restartGif(img); // clone restarts GIF, old node never goes blank
 
     pressTimers[songId] = setTimeout(() => {
-      setButtonActive(btn, img, songId);
+      // Use the live node from the DOM, not the stale pre-clone reference
+      setButtonActive(btn, getImg(btn), songId);
       delete pressTimers[songId];
     }, PRESS_GIF_MS);
   }
@@ -151,8 +176,8 @@
     btn.classList.remove("song-btn--pressing");
     btn.classList.add("song-btn--active");
     btn.setAttribute("aria-pressed", "true");
-    img.src = "";
     img.src = activeSrc(songId);
+    restartGif(img); // restart active GIF clean from frame 1
   }
 
   function clearTimer(songId) {
@@ -235,6 +260,9 @@
     // Audio: stop previous, play song select snippet for the new song
     audioManager.stopAll();
     audioManager.playClick(songId);
+
+    // Hide YouTube player when switching songs
+    ytManager.hide();
 
     // Stage 3: reset rotation for incoming song, enable slider + reset button
     vinylArtworkWrap.style.transform = "rotate(0deg)";
@@ -438,6 +466,139 @@
   })();
 
   /* ═══════════════════════════════════════════
+     STAGE 4 — YOUTUBE PLAYER + VINYL SPINNER
+  ═══════════════════════════════════════════ */
+
+  /**
+   * Manages the single reused YouTube IFrame player.
+   * The YouTube IFrame API is loaded lazily on first use.
+   */
+  const ytManager = (() => {
+    let player = null;
+    let apiReady = false;
+    let pendingSong = null;  // song to load once API is ready
+
+    // Expose the YT ready callback globally — the API calls this when loaded
+    window.onYouTubeIframeAPIReady = () => {
+      apiReady = true;
+      if (pendingSong) {
+        _createPlayer(pendingSong);
+        pendingSong = null;
+      }
+    };
+
+    function _loadAPI() {
+      if (document.getElementById("yt-api-script")) return; // already loading
+      const s = document.createElement("script");
+      s.id  = "yt-api-script";
+      s.src = "https://www.youtube.com/iframe_api";
+      document.head.appendChild(s);
+    }
+
+    function _createPlayer(song) {
+      // Clear existing embed content
+      ytEmbed.innerHTML = "";
+      const div = document.createElement("div");
+      ytEmbed.appendChild(div);
+
+      player = new YT.Player(div, {
+        height: "100%",
+        width:  "100%",
+        videoId: song.yt.id,
+        playerVars: {
+          start:       song.yt.start,
+          autoplay:    0,
+          rel:         0,
+          modestbranding: 1,
+          playsinline: 1,
+        },
+        events: {
+          onStateChange: (e) => {
+            if (e.data === YT.PlayerState.PLAYING) {
+              vinylSpinner.start();
+            } else {
+              vinylSpinner.stop();
+            }
+          },
+        },
+      });
+    }
+
+    return {
+      /** Show the panel and load (or cue) the given song. */
+      show(song) {
+        ytPanel.hidden = false;
+        if (!apiReady) {
+          _loadAPI();
+          pendingSong = song;
+          return;
+        }
+        if (player && typeof player.cueVideoById === "function") {
+          player.cueVideoById({ videoId: song.yt.id, startSeconds: song.yt.start });
+        } else {
+          _createPlayer(song);
+        }
+      },
+
+      /** Stop playback and hide the panel. */
+      hide() {
+        ytPanel.hidden = true;
+        vinylSpinner.stop();
+        if (player && typeof player.stopVideo === "function") {
+          player.stopVideo();
+        }
+      },
+
+      /** Full teardown — called on song switch so the player doesn't bleed audio. */
+      reset() {
+        this.hide();
+        if (player && typeof player.destroy === "function") {
+          player.destroy();
+          player = null;
+        }
+        ytEmbed.innerHTML = "";
+      },
+    };
+  })();
+
+  /**
+   * Handles smooth continuous vinyl rotation during YouTube playback.
+   * Reads the current manual slider angle so it never jumps on start/stop.
+   * The manual slider continues to work — its `input` event overrides
+   * the CSS animation transform directly, which takes precedence over
+   * the animation's current keyframe.
+   */
+  const vinylSpinner = (() => {
+    let spinning = false;
+
+    return {
+      start() {
+        if (spinning) return;
+        spinning = true;
+        // Capture the current rotation angle from the slider so we start
+        // spinning from wherever the user left the artwork, not from 0.
+        const currentDeg = parseInt(rotationSlider.value, 10) || 0;
+        vinylArtworkWrap.style.setProperty("--vinyl-start-deg", `${currentDeg}deg`);
+        vinylArtworkWrap.classList.add("vinyl-artwork-wrap--spinning");
+      },
+
+      stop() {
+        if (!spinning) return;
+        spinning = false;
+        // Freeze at the current visual rotation angle before removing animation
+        const computed = window.getComputedStyle(vinylArtworkWrap).transform;
+        vinylArtworkWrap.classList.remove("vinyl-artwork-wrap--spinning");
+        // Apply the frozen angle so there's no snap-back to slider value
+        vinylArtworkWrap.style.transform = computed;
+        // Parse the angle back so the slider stays in sync if user touches it
+        const matrix = new DOMMatrix(computed);
+        const angle  = Math.round(Math.atan2(matrix.b, matrix.a) * (180 / Math.PI));
+        rotationSlider.value = ((angle % 360) + 360) % 360;
+      },
+    };
+  })();
+
+  /* ═══════════════════════════════════════════
      STAGE 3 — GUESSING SYSTEM
   ═══════════════════════════════════════════ */
 
@@ -608,6 +769,19 @@
 
   /* ── Result display ── */
 
+  /**
+   * Append a small "Listen to the Song" button to the result area.
+   * Called after both correct guesses and reveals.
+   */
+  function showListenButton(song) {
+    if (!song.yt) return; // no YouTube data for this song
+    const btn = document.createElement("button");
+    btn.className   = "listen-btn";
+    btn.textContent = "♪  listen to the song";
+    btn.addEventListener("click", () => ytManager.show(song));
+    resultMsg.appendChild(btn);
+  }
+
   function clearResult() {
     hintResultZone.classList.remove("hint-result-zone--solved");
     resultMsg.className   = "result-msg";
@@ -637,6 +811,7 @@
       </span>
     `;
     updateScore(song.id);
+    showListenButton(song);
   }
 
   function showReveal(song) {
@@ -647,6 +822,7 @@
         <span class="result-label">Answer</span><span class="result-band">${escHtml(song.artist)}</span><span class="result-sep">—</span><span class="result-song">${escHtml(song.answer)}</span>
       </span>
     `;
+    showListenButton(song);
   }
 
   /** Minimal HTML escape to prevent XSS from song data */
@@ -741,7 +917,10 @@
     resultMsg.className         = "result-msg";
     resultMsg.innerHTML         = "";
 
-    // ── 5. Reset button ──
+    // ── 5. YouTube player ──
+    ytManager.reset();
+
+    // ── 6. Reset button ──
     // Disable itself — project is back to fresh-page state
     resetBtn.disabled = true;
   }
@@ -799,6 +978,7 @@
     bindResetButton();     // Stage 3
     bindHintButtons();     // Stage 3
     preloadAllAssets();    // Background preload — does not block initial render
+    ytClose.addEventListener("click", () => ytManager.hide());
   }
 
   /**

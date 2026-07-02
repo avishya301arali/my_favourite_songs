@@ -47,7 +47,7 @@ body {
   display: flex;
   align-items: flex-start;
   justify-content: center;
-  padding-top: 34px;
+  padding-top: 30px;
 }
 
 /* ── Background artwork ── */
@@ -388,6 +388,91 @@ body {
   color: var(--ink);
   letter-spacing: 0.02em;
   line-height: 1.05;
+}
+
+/* ── YouTube panel ── */
+.yt-panel {
+  position: absolute;
+  top: 108px;          /* below reset + score */
+  right: 32px;
+  width: 220px;
+  background: var(--ink);
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 6px 24px rgba(44,44,36,0.28);
+  z-index: 20;
+}
+
+.yt-panel[hidden] {
+  display: none;
+}
+
+.yt-close {
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  background: transparent;
+  border: none;
+  color: var(--ink-faint);
+  font-size: 0.75rem;
+  line-height: 1;
+  cursor: url('assets/cursor.png') 16 16, pointer;
+  z-index: 1;
+  padding: 2px 4px;
+  transition: color 140ms ease;
+}
+
+.yt-close:hover {
+  color: var(--cream);
+}
+
+.yt-embed {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+}
+
+.yt-embed iframe {
+  width: 100%;
+  height: 100%;
+  display: block;
+  border: none;
+}
+
+/* Listen button — appears inline after result text */
+.listen-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 5px;
+  font-family: var(--font-body);
+  font-size: 0.72rem;
+  font-style: italic;
+  font-weight: 400;
+  color: var(--gold);
+  background: transparent;
+  border: 1px solid var(--gold);
+  border-radius: 6px;
+  padding: 3px 10px;
+  cursor: url('assets/cursor.png') 16 16, pointer;
+  letter-spacing: 0.03em;
+  transition: background 150ms ease, color 150ms ease;
+  opacity: 0;
+  animation: resultFadeUp 300ms 500ms ease forwards;
+}
+
+.listen-btn:hover {
+  background: var(--gold);
+  color: var(--ink);
+}
+
+/* Vinyl auto-spin during YouTube playback */
+@keyframes vinylAutoSpin {
+  from { transform: rotate(var(--vinyl-start-deg, 0deg)); }
+  to   { transform: rotate(calc(var(--vinyl-start-deg, 0deg) + 360deg)); }
+}
+
+.vinyl-artwork-wrap--spinning {
+  animation: vinylAutoSpin 8s linear infinite;
 }
 
 /* ── Vinyl zone ── */
