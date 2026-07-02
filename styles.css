@@ -443,7 +443,7 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  margin-top: 5px;
+  margin-top: 0;
   font-family: var(--font-body);
   font-size: 0.72rem;
   font-style: italic;
@@ -827,11 +827,10 @@ body {
   display: flex;
   flex-direction: row;
   align-items: center;
-  gap: 0;
+  gap: 12px;
   padding: 0 2px;
   pointer-events: none;
   opacity: 0;
-  white-space: nowrap;
   overflow: hidden;
 }
 
@@ -841,8 +840,12 @@ body {
   opacity: 1;
 }
 
-.result-msg--correct .result-inline {
-
+.result-msg--correct .result-inline,
+.result-msg--reveal .result-inline {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  white-space: nowrap;
   font-family: var(--font-display);
   font-size: 1rem;
   font-style: normal;
